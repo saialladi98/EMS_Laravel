@@ -486,4 +486,33 @@ class UserController extends Controller
             <?php
         }
     }
+
+    //update project Function
+    public function updateProject(Request $req)
+    {
+        $id = $req->project_id;
+        $project_date = DB::Table('projects')->select('project_start_date')->where('project_id', $id)->get();
+        $project_name = $req->project_name;
+        $project_desc = $req->project_desc;
+        $project_start_date = $req->start_date;
+        $project_end_date = $req->end_date;
+        
+        if ($project_name) {
+            $data1 = project::where('project_id', $id)->update(array('project_name' => $project_name));
+            return back()->with('success', 'Sucessfully updated!!!');
+        }
+        if ($project_desc) {
+            $data2 = project::where('project_id', $id)->update(array('project_desc' => $project_desc));
+            return back()->with('success', 'Sucessfully updated!!!');
+        }
+        if ($project_start_date) {
+            $data2 = project::where('project_id', $id)->update(array('project_start_date' => $project_start_date));
+            return back()->with('success', 'Sucessfully updated!!!');
+        }
+        if ($project_end_date) {
+            return back()->with('success', 'Sucessfully updated!!!');
+        } else {
+            return back()->with('fail', ' Details not updated!!!');
+        }
+    }
 }
