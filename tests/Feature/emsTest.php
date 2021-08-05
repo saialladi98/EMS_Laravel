@@ -6,161 +6,157 @@ use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
+     /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_example()
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+    }
+
     /**
      * set Previous url
-     */
+    */
     public function from(string $url)
     {
         $this->app['session']->setPreviousUrl($url);
         return $this;
     }
 
+    // testcase for loginpage
     /**
      * Login Test
      * @dataProvider loginData
      */
-
     public function testLogin($username, $password, $status, $redirectTo)
     {
-        fwrite(STDOUT, "\n" . __METHOD__ . " $username" . " $password\n");
+        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
         $response = $this->from('login')
             ->post(
-                '/loginFunction', [
-                    "userid" => $username,
+                'loginFunction', [
+                    "user_id" => $username,
                     "password" => $password,
                 ]);
         $response->assertStatus($status);
         $response->assertRedirect($redirectTo);
     }
-
     /**
-     * data provider for testLogin function
-     */
+     * Data provider for testLogin function
+    */
     public function loginData()
     {
         return ([
-            ["ganga@gmail.com", "ganga@12345", 302, "normal"], // normal
-            ["Shreya@gmail.com", "Shreya@123", 302, "login"], // admin
-            ["ganga@gmail.com", "abcd", 302, "login"], //wrong password
-            //["abcd123", "1234", 302, "login"], // invalid credenial
+            ["Mira@gmail.com", "mira#123", 302, "login"],
+            ["Sai@gmail.com", "sai@1234", 302, "login"],
+            ["Shreyashi@gmail.com", "shreya@123", 302, "login"],
+            ["abcd123", "1234", 302, "login"],
         ]);
     }
+// testcase for login route
+public function testloginPage()
+{
+    $response = $this->get('/login');
+    $response->assertStatus(200);
+    // $response->assertViewIs('login');
+}
 
-    /**
-     * @dataProvider  normalMob
-     */
+// testcase for registerpage route
+public function testregisterPage()
+{
+    $response = $this->get('/register');
+    $response->assertStatus(200);
+} 
+ 
+// testcase for forgetpassword route
+public function testforgetPasswordPage()
+{
+    $response = $this->get('/forgetPassword');
+    $response->assertStatus(200);
+}
 
-    public function testNormalMob($emp_id, $mobile, $status, $redirectTo)
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . " $emp_id" . " $mobile\n");
-        $response = $this->from('normal')
-            ->post(
-                '/updateMobile', [
-                    "employee_id" => $emp_id,
-                    "mobile_no" => $status,
-                ]);
-        $response->assertStatus($status);
-        $response->assertRedirect($redirectTo);
-    }
+// testcase for reset password
+/**
+ * @dataProvider resetData
+ */
+public function testResetPassword($username, $password, $newPassword, $status, $redirectTo)
+{
+    fwrite(STDOUT, "\n" . __METHOD__ . "\n");
+    $response = $this->from('forgetPassword')
+        ->post(
+            "resetPassword",
+            [
+                "user_id" => $username,
+                "password" => $password,
+                "re_password" => $newPassword,
+            ]);
+    $response->assertStatus($status);
+    $response->assertRedirect($redirectTo);
+}
+/**
+ * Data provider for testResetPassword
+*/
+public function resetData()
+{
+    return ([
+        ["Mira@gmail.com", "mira@123", "mira@123", 302, "forgetPassword"],
+        ["Sai@gmail.com", "abcd123", "xyx123", 302, "forgetPassword"],
+    ]);
+}
 
-    public function normalMob()
-    {
-        return ([
-            ["5", "9866506401", 302, "normal"],
-        ]);
-    }
+// public function test_interacting_with_cookies()
+// {
+//     $response = $this->withCookie('color', 'blue')->get('/');
 
-    /**
-     * Testing Login Route
-     */
-    public function testRouteLogin()
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
-        $response = $this->get("login");
-        $response->assertStatus(200);
-    }
+//     $response = $this->withCookies([
+//         'color' => 'blue',
+//         'password' => 'Mira@123',
+//     ])->get('/');
+//     $response->assertStatus(200);
+// }
 
-    /**
-     * Testing Reset Password Route
-     */
+/**
+ * @dataProvider inputRegister
+*/
+public function testRegisterForm($first_name,$last_name,$mobno,$dateOfBirth,$gender,$address,$city,$typeOfUser,$password,$status,$redirectTo)
+{
+    fwrite(STDOUT, "\n" . __METHOD__ . "\n");
+    $response = $this->from('register')
+        ->post(
+            "resetPassword",
+            [
+                "first_name" => $first_name,
+                "last_name" => $last_name,
+                "mobile_no" => $mobno,
+                "dateOfBirth" => $dateOfBirth,
+                "gender" => $gender,
+                "communication_address" =>$address,
+                "city" => $city,
+                "type_of_user" => $typeOfUser,
+                "password" => $password   
+            ]);
+            $response->assertStatus($status);
+           $response->assertRedirect($redirectTo);
+}
 
-    public function testResetPasswordRoute()
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
-        $response = $this->get("forgetPassword");
-        $response->assertStatus(200);
-    }
+public function inputRegister()
+{
+    return ([
+        ["Mira", "Kumari", "9973032554",'22-01-1999',"female","patna","hyderabad","normal user","Mira@123",302,"register" ],
+        
+    ]);
+}
 
-    /**
-     * Testing resetpassword function
-     * @dataProvider resetData
-     */
+// testcase for update mobile number
+public function test_updateMobile()
+{
+    $response = $this->call('POST', 'updateMobile', array(
+        '_token' => csrf_token(),
+    ));
+    $this->assertEquals(500, $response->getStatusCode());
+}
 
-    public function testResetPassword($username, $password, $newPassword, $status, $redirectTo)
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
-        $response = $this->from('forgetPassword')
-            ->post(
-                "resetPassword",
-                [
-                    "user_id" => $username,
-                    "password" => $password,
-                    "re_password" => $newPassword,
-                ]);
-        $response->assertStatus($status);
-        $response->assertRedirect($redirectTo);
-    }
-
-    /**
-     * Data provider for testResetPassword
-     */
-
-    public function resetData()
-    {
-        return ([
-            ["ganga@gmail.com", "ganga@123", "ganga@123", 302, "forgetPassword"],
-            ["sai@gmail.com", "sai@123", "Sai@123", 302, "forgetPassword"],
-        ]);
-    }
-
-    public function testRegisterRoute()
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
-        $response = $this->get("register");
-        $response->assertStatus(200);
-    }
-
-    /**
-     * @dataProvider inputRegister
-     */
-
-    public function testRegisterForm($first_name, $last_name, $mobno, $dateOfBirth, $gender, $address, $city, $typeOfUser, $password, $user_id, $status, $redirectTo)
-    {
-        fwrite(STDOUT, "\n" . __METHOD__ . "\n");
-        $response = $this->from('register')
-            ->post(
-                "resetPassword",
-                [
-                    "first_name" => $first_name,
-                    "last_name" => $last_name,
-                    "mobile_no" => $mobno,
-                    "dateOfBirth" => $dateOfBirth,
-                    "gender" => $gender,
-                    "communication_address" => $address,
-                    "city" => $city,
-                    "type_of_user" => $typeOfUser,
-                    "password" => $password,
-                    "user_id" => $user_id,
-                ]);
-        $response->assertStatus($status);
-        $response->assertRedirect($redirectTo);
-    }
-    
-    public function inputRegister()
-    {
-        return ([
-            ["Mira", "Kumari", "9973032554", '22-01-1999', "female", "patna", "hyderabad", "normal user", "Mira@123", "Mira@gmail.com", 302, "register"],
-
-        ]);
-    }
 }
